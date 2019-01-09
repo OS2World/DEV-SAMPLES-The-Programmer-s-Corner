@@ -1,0 +1,23 @@
+--------------------------------------------------------------
+Module definition file: DUMP.DEF
+--------------------------------------------------------------
+ 
+NAME DUMP
+PROTMODE
+DATA MOVEABLE
+CODE MOVEABLE PURE
+STACKSIZE 4096
+ 
+--------------------------------------------------------------
+MAKE file: DUMP
+--------------------------------------------------------------
+ 
+dump.obj : dump.asm
+  masm /Zi dump;
+ 
+dump.exe : dump.obj dump.def dump
+  link /CO dump,,,doscalls,dump
+ 
+--------------------------------------------------------------
+ 
+
