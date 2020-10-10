@@ -2,6 +2,7 @@
 Samples from the The Programmer's Corner. 
 
 * OS2AP-DUMP: DUMP sample in assembler and C.
+* Sedexec: Execute compiled form of stream editor commands
 
 LICENSE
 ===============
