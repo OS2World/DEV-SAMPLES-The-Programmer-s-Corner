@@ -1,0 +1,71 @@
+/**
+
+  CvtIcons.exe Copyright @ 1991 Jay Giganti All Rights Reserved
+
+
+              All Options are Mutually Exclusive
+
+         x : Extracts Icons from Windows ICO file(s)
+         w : Converts ICO files from PM to Windows
+         p : Converts ICO files from Windows to PM
+         ? : Displays this screen
+
+        Usage CVTICONS -option File (Wild Cards Accepted)
+
+        examples cvticons -x c:\windows\*.*
+                 cvticons -p *.ico
+
+        example 1 : will extract all icons from the files in c:\windows
+                    directory and will create them in your current directory
+
+        example 2 : will convert all ICO files in your current directory
+                    into ICP files in the PM format in your current directory
+        
+This program currently does three things.
+Extracts Icons:
+  It will extract Icons from windows EXE and DLL files.  It scans through
+  these files and will create a file with and extension of .ICO based upon
+  2 things.  First it will look in the resource table for any Names, if it
+  finds a name it will use up to 8 characters of it to create the file
+  name.  If There were no names found in the resource table, or there were
+  more icons than names, (ie -- several Icons in one directory entry) then
+  the icon name will containg the first 5 characters if the program it is
+  stripping it from, and then append a 3 digit number,m thus you can process
+  a file with up 1000 icons in it.  
+  side note:  I stripped a file form the MS-DOS program  under windows and
+              found a 64x64 OS/2 1.1 icon format.
+
+Converts Icons To PM Format:
+  This will translate an ICO file into a PM format.  It creates the file
+  with an .ICP extension.  Currently I will only copy one Icon from each ICO
+  file, since this is how I write them.  If Needed I will add multiple
+  icons per ICO file handling.  The format for the icon will be written
+  in its current dimensions, ie: a 32x32 stays 32x32. Under OS/2 1.2 it
+  seems that if they are not 64x64 then it is not in a device independent (DI)
+  format, thus when loaded into the Icon Editor, you are told the It has
+  created on for you, if you save the file, then this 64x64 DI format will
+  be written to disk along with the origional 32x32 format.  I have the Icon
+  Editor do all translation.  In the furture I might do the streching required
+  to create a 64x64 bitmap and thus the resulting PM file will be smaller 
+  and the icon editor won't complain.  The reason it would be smaller is 
+  because there would only be one format stored in it.
+
+Converts Icons To Windows 3.0 Format:
+  This will translate a PM Icon file into a Windows format.  It will translate
+  all Icons in the file, as long as they are <= 32x32.  I might add the
+  functionality to squeeze 64x64 to 32x32 but the Icon edititor does a good
+  job.  Thus if you have a 64x64 then select a VGA type and it will be 
+  converted to a 32x32 format which I can read and save in a file.  The
+  file will be named with the filename and the extensions .ICW. If there
+  is more than one Icon which is <= 32x32 then the next filename will be
+  created with the first 6 characters of the filename plus a 2 digit number
+  and then .ICW appended to it.
+
+  In the future I will port this to a Windows and PM app but this does the
+  job for now.  It is a dos program.  Also I will probably add the ability
+  to read and write multiple icons per ICO file, and the ability to extract
+  icons from windows files and convert them directly to PM format.  Currently
+  you have to extract and then convert.  I also will probably add the ability
+  to extract Icons from OS/2 files.  Until then I hope this utility helps.
+
+***/

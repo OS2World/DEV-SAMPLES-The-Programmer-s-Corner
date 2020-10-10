@@ -1,0 +1,7 @@
+#	make script for iffull
+#	markexe (in SDK 1.05) seems to return exit code 3, which will
+#	produce a harmless error message in make!
+
+iffull.exe: $*.c
+	cl /Lp $*.c
+	markexe /pmvio $*.exe

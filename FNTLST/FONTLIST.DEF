@@ -1,0 +1,11 @@
+;-------------------------------------
+; FONTLIST.DEF module definition file
+;-------------------------------------
+
+NAME           FONTLIST  WINDOWAPI
+
+DESCRIPTION    'Font List Program (c) 1989, Charles Petzold'
+PROTMODE
+HEAPSIZE       1024
+STACKSIZE      8192
+EXPORTS        ClientWndProc

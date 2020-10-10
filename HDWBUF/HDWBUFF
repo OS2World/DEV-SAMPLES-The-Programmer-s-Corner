@@ -1,0 +1,14 @@
+CFLAGS = -c -ALw -G2sw 
+LOPT = $(LDBG) /align:16 /NOD
+IFLAGS = 
+
+.c.obj:
+   cl $(CFLAGS) $(IFLAGS) $*.c 
+
+hdwbuff.obj : hdwbuff.c
+
+hdwbuff.exe: hdwbuff.c
+        link $(LOPT) @hdwbuff.rsp
+
+
+

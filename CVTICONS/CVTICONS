@@ -1,0 +1,12 @@
+.c.obj:
+          cl /c  /Ot /W4 /WX /AS $*.c
+
+all: cvticons.exe
+
+cvticons.obj: cvticons.c 
+
+getopt.obj:   getopt.c
+
+cvticons.exe:  cvticons.obj \
+               getopt.obj
+               link /NOE cvticons+getopt+setargv,,,,;

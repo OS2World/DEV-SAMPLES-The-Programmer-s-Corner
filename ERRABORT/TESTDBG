@@ -1,0 +1,11 @@
+#
+# OS/2 makefile for 'test' using Microsoft C 5.1
+#
+
+.c.obj:
+	cl -AS -c -G2 -Lp -Od -W3 -Zi -Zp $*.c
+
+test.obj:	test.c
+
+test.exe:	test.obj c:\usr_dll\debug.lib c:\usr_dll\debug.dll testdbg
+	link /CO test,test,NUL,c:\usr_dll\debug;

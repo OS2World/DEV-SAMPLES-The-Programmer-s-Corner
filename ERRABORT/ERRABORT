@@ -1,0 +1,28 @@
+#
+# OS/2 makefile for 'errabort' using Microsoft C 5.1
+#
+# Check this file VERY CAREFULLY before you use it, since it
+# creates or copies files in various locations that may conflict
+# with YOUR system setup; it works for me.
+
+# Check these compiler flags carefully; you may prefer others.
+.c.obj:
+	cl -Asnu -c -G2s -Lp -Ois -W3 -Zp $*.c
+
+errabort.obj:	errabort.c errabort
+
+debug.dll:		errabort.obj errabort.def errabort
+	link /CO /NOI /NOD errabort,debug.dll,NUL,doscalls,errabort.def
+
+debug.lib:		errabort.def errabort
+	implib debug.lib errabort.def
+
+c:\usr_dll\debug.lib:	debug.lib
+# Check out the destination of this COPY statement; replace it with one
+# appropriate for your system setup.
+	copy debug.lib c:\usr_dll\debug.lib
+
+c:\usr_dll\debug.dll:	debug.dll
+# Check out the destination of this COPY statement; replace it with one
+# appropriate for your system setup.
+	copy debug.dll c:\usr_dll\debug.dll

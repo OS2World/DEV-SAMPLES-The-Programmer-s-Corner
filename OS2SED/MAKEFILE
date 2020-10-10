@@ -1,0 +1,50 @@
+MODEL		= L
+CFLAGS		= -Ox -A$(MODEL)
+DEST		= .
+EXTHDRS		=
+FFLAGS		=
+HDRS		= sed.h
+LDFLAGS		= /exepack
+LDMAP		= $(@R)
+LIBS		=
+LINKER		= link
+MAKEFILE	= Makefile
+OBJS		= sedcomp.obj sedexec.obj
+PRINT		= print
+PROGRAM		= sed.exe
+
+SETARGV		= d:\c600\lib\setargv
+SRCS		= sedcomp.c sedexec.c
+
+all:		$(PROGRAM)
+
+$(PROGRAM):     $(OBJS) $(LIBS)
+		@echo Loading $(PROGRAM) ...
+		@$(LINKER) $(OBJS), $(PROGRAM), $(LDMAP), $(LIBS) $(LDFLAGS);
+		@echo done
+
+clean:;		@rm -f $(OBJS)
+
+depend:; 	@mkmf -f $(MAKEFILE) PROGRAM=$(PROGRAM) DEST=$(DEST)
+
+index:;		@ctags -wx $(HDRS) $(SRCS)
+
+install:	$(PROGRAM)
+		@echo Installing $(PROGRAM) in $(DEST)
+		@if not $(DEST)x==.x copy $(PROGRAM) $(DEST)
+
+print:;		@$(PRINT) $(HDRS) $(SRCS)
+
+program:        $(PROGRAM)
+
+tags:           $(HDRS) $(SRCS); @ctags $(HDRS) $(SRCS)
+
+update:		$(DEST)/$(PROGRAM)
+
+$(DEST)/$(PROGRAM): $(SRCS) $(LIBS) $(HDRS) $(EXTHDRS)
+		@make -f $(MAKEFILE) DEST=$(DEST) install
+### OPUS MKMF:  Do not remove this line!  Automatic dependencies follow.
+
+sedcomp.obj: sed.dcl sed.h
+
+sedexec.obj: sed.dcl sed.h

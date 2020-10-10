@@ -1,0 +1,6 @@
+LIBRARY DEBUG
+DESCRIPTION	'General Error Handler Utility by Wayne Kovsky'
+PROTMODE
+DATA SHARED
+EXPORTS
+	ERRABORT

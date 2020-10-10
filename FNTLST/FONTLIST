@@ -1,0 +1,9 @@
+#--------------------
+# FONTLIST make file
+#--------------------
+
+fontlist.obj : fontlist.c
+     cl -c -G2sw -W3 fontlist.c
+
+fontlist.exe : fontlist.obj fontlist.def
+     link fontlist, /align:16, NUL, os2, fontlist

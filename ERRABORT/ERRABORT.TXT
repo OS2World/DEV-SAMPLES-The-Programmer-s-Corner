@@ -1,0 +1,215 @@
+=========================================================================
+errabort.c - A debugging tool for OS/2 programmers.
+=========================================================================
+
+Description:
+
+This DLL is to be called after first calling any OS/2 function and
+testing for expected return codes.  "Testing for expected return
+codes" means, for example, testing for zero (successful completion)
+IN EVERY CASE, and testing for errors that your program anticipates
+and has code to handle, such as "File not found" when calling
+'DosOpen ()'.
+
+Any other error return presumably is one that your program did not
+anticipate and cannot properly handle.  In that case, a call to this
+DLL will result in the display of an error message, and a termination
+of your program.  The error message includes your program's name,
+the name of the function within your program that made the call to an
+OS/2 function, the line number where the call to this program originated
+(which should be the line immediately following the call to the OS/2
+function that returned an unexpected error code), the name of the OS/2
+function being called, the number of the error code, and a message
+associated with the error code.
+
+If you are not presently testing EVERY OS/2 function call's return
+value, then you may be surprised by some of the error messages (and
+program aborts) that calls to this program will give you.  I have
+found return codes that are not documented as being among those
+returned by certain functions, for example.  In other cases, return
+codes that I anticipated (such as 'ERROR_FILE_NOT_FOUND' and
+'ERROR_PATH_NOT_FOUND' from 'DosFindFirst ()') were NOT returned;
+instead I got 'ERROR_NO_MORE_FILES' (it surprised me; maybe it
+wouldn't surprise you).
+
+Since this program is a DLL, it is certainly cheap enough to include
+a call to it after every  OS/2 call, at least during debugging.  I
+modify the ERRCHK macro (included as part of this package) to
+conditionally generate code depending on the state of a global
+debugging flag, which makes it easy to remove the calls.
+
+=========================================================================
+
+Example output (produced by included program TEST.C):
+
+    Test routine for 'errabort ()' has just begun.
+
+    Unexpected error return 18 from OS/2 function "DosFindFirst ()".
+    "No more files"
+    Caller program:  "test".
+    Caller function:  "main".
+    Near line number:  32.
+
+=========================================================================
+
+Package contents:
+    ERRABORT.DOC    This file
+    ERRABORT.C      The complete source code to 'errabort ()'
+    ERRABORT        The makefile for 'errabort ()'
+    ERRABORT.DEF    Definition file to make a DLL
+    ERRABORT.OBJ    My compiled version of ERRABORT.C
+    DEBUG.DLL       The completed DLL containing 'errabort ()'
+    DEBUG.LIB       The IMPLIB containing 'errabort ()'
+    TEST.C          A program that illustrates how to use 'errabort ()'
+    TESTDBG         The makefile for 'test ()'
+    TEST.OBJ        My compiled version of TEST.C
+    TEST.EXE        My linked version of TEST.C
+    OS2LOCAL.H      '#include' file with function prototype and macros
+
+=========================================================================
+
+Instructions for using 'errabort ()' with your own programs:
+
+(It may be helpful to print a copy of TEST.C and follow along in it;
+very experienced C and OS/2 programmers can probably get all they need
+from just that code and the other sources alone, without reading this
+section.  However, don't be lured into doing that just to PROVE that
+you are a very experienced C and OS/2 programmer ...)
+
+You must '#include' the supplied file 'OS2LOCAL.H' in each program that
+will call 'errabort ()'.  You can of course rename OS2LOCAL.H to
+whatever you like, or you can simply incorporate its contents into
+your own usually-included local file.  OS2LOCAL.H has the function
+prototype for 'errabort ()' that will be needed by your program, and
+it has the 'ERRCHK ()' macro that automates calling 'errabort ()'.
+
+The 'ERRCHK ()' macro looks like this:
+
+    #define ERRCHK(os2name)    if (usRC != 0) { \
+        errabort (pszProgramName, #os2name, \
+                  pszFunctionName, __LINE__, usRC) ; \
+               }
+
+You must have the following data elements defined in your program, using
+the same data type and name (unless you change the macro):
+
+    PSZ pszProgramName ;
+    PSZ pszFunctionName ;
+    USHORT usRC ;
+
+I declare 'pszProgramName' as a static global, initialized to my program's
+name, just for safety; however, I then change it to point to 'argv [0]',
+to get the actual execution name.
+
+'pszFunctionName' is declared as a static variable within each function
+that might call 'errabort ()', initialized to the name of the function.
+'errabort ()' itself supplies '()' when it prints the error message, so
+you can save a little static string space by omitting the parentheses.
+
+'usRC' is used as the target of every call to an OS/2 system function,
+to receive the return code.  After calling the OS/2 function, test
+'usRC' for the values that your program is set up to expect and handle,
+then write 'ERRCHK (OS2FunctionName)' as the next statement.  Note that
+the 'ERRCHK' macro is defined in such a way that you can code it either
+as if it is a macro, or as if it is a function call (that is, you can
+include or omit the terminating semicolon).
+
+The '__LINE__' preprocessor variable used by the macro may not be
+available to you, depending on how old or how lousy your compiler is;
+Microsoft C 5.1 has it, as did (I believe) 5.0.  If it is not available
+to you, you will have to change the macro and ERRABORT.C, an exercise
+left to the reader.
+
+You may also note that 'ERRCHK' does NOT call 'errabort ()' if 'usRC == 0';
+thus, you can simply add the 'ERRCHK' macro after every one of your
+existing OS/2 function calls, and it will be benign unless you have
+an error that you had previously not known about.
+
+Finally, you may wish to change 'ERRCHK' to do nothing at all unless you
+have '#define'd some global debugging variable.  In fact, the 'ERRCHK'
+that I actually use looks more like this:
+
+    #if defined FULL_ERRCHK
+    #define ERRCHK(os2name)    if (usRC != 0) { \
+        errabort (pszProgramName, #os2name, \
+                  pszFunctionName, __LINE__, usRC) ; \
+               }
+    #else
+    #define ERRCHK(os2name)
+    #endif /* #if defined FULL_ERRCHK */
+
+This way, your MAKE file can control the cautiousness of your code, and
+thus the quantity of code generated.  In practice, though, I have tended
+to let 'ERRCHK' generate the call even in "fully-debugged" programs,
+because the overhead is really very small, and because I have never
+yet been able to write a "fully-debugged" program that does more than
+'HELLO.C' is capable of.
+
+Experienced OS/2 programmers may also note that the ERRABORT.DEF module
+definition file does not specify an ordinal number as part of the
+'EXPORTS' statement.  This was a deliberate choice on my part, because
+doing so precludes using BIND to create a family-mode application.
+
+(Yes, I sometimes do that, in spite of the fact that in family-mode you
+lose all of the benefits that a DLL makes possible, the most obvious of
+which is that 'errabort ()' in family mode makes every program you write a
+total pig for memory and disk space.  It is useful for debugging even
+in that environment, though, and it is easily replaced with a routine
+that omits the text; alternately, it can be removed altogether for that
+mythical "fully-debugged" application, as described above.)
+
+In actual practice, though, 'errabort ()' is just one member of a larger
+DLL that I use, and it does have an ordinal in that larger library.
+I hope that pointing this out doesn't cause any trauma for chronic
+decision-avoiders ... especially since it took me three days to decide
+whether to mention it or not ...
+
+=========================================================================
+
+Instructions for use of supplied files:
+
+Before you do anything at all, read the source files and the make files
+carefully.  I am posting this collection of stuff to BIX, and I know
+that it is in good condition there.  However, it is folly to simply
+compile and execute ANYTHING you receive from any source outside your
+direct control, without first studying it to verify that it is benign.
+This particular program is extremely simple, but if you are unfamiliar
+with OS/2 and therefore find that it is not simple for you, have
+someone who is take a look at it.  (Not someone who is simple; someone
+who is familiar with OS/2.  Of course, becoming familiar with OS/2 can
+make you simple.  It worked for me.)
+
+First, examine the MAKE files very carefully, to be certain that you
+are not going to write over some of your own important files.  In
+particular, note that the ERRABORT makefile will do a copy of its
+DEBUG.DLL and DEBUG.LIB output to a directory on the C: drive.  It
+works fine on my system, but it is highly unlikely that it is correct
+for yours.
+
+After adjusting the MAKE files appropriately, simply do this:
+
+        make errabort
+        make testdbg
+        test    (or 'cvp test' if you want to use CodeView)
+
+(Note:  the sources were created using Brief, and tabs are set at every
+four spaces from 9 through 45.  This may help you in either editing or
+printing these sources.)
+
+=========================================================================
+
+This program with all its associated materials is explicitly placed into
+the public domain.  Feel free to use it, modify it, or incorporate it
+into your own programs, whether for your own use or for sale; in short,
+enjoy.  And if you have something of your own that is useful but was
+equally tedious to produce, please share it with the rest of us.
+
+=========================================================================
+If you have questions or comments about this program, I am:
+
+Author:  Wayne Kovsky               BIX:            wkovsky
+         Pinnacle Software          CompuServe:     76164,3504
+         299 Village Street
+         Millis, MA  02054
+=========================================================================
+
